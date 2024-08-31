@@ -7,8 +7,12 @@ def get_genome(filename):
         genome = ''
         for line in f:
             if not line[0] == '>':
-                print(line)
+                # print(line)
                 genome += line.rstrip()
+            else:
+                header = line.split(' ')[0]
+                name = header[0][:1]
+                # print(name)
         return genome
     
     
@@ -72,17 +76,27 @@ def naive_with_rc(p, t):
 #     print(collections.Counter(file_content))
     
 def download_file(filename, url):
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+    }
     try:
-        response = requests.get(url)
+        response = requests.get(url, headers=headers, timeout=60000)  # Add headers and set a timeout
         response.raise_for_status()  # Raise an error for bad responses
         with open(filename, 'wb') as file:
             file.write(response.content)
         print(f"Download completed: {filename}")
+    except requests.exceptions.HTTPError as http_err:
+        print(f"HTTP error occurred: {http_err}")
+    except requests.exceptions.ConnectionError as conn_err:
+        print(f"Connection error occurred: {conn_err}")
+    except requests.exceptions.Timeout:
+        print("The request timed out.")
     except requests.exceptions.RequestException as e:
-        print(f"Error downloading file: {e}")
+        print(f"An error occurred: {e}")
 
-download_file('phix.fa', 'http://d396qusza40orc.cloudfront.net/ads1/data/phix.fa')
 
+# download_file('phix.fa', 'https://d396qusza40orc.cloudfront.net/ads1/data/phix.fa')
+# download_file('lambda_virus.fa',  'https://d28rh4a8wq0iu5.cloudfront.net/ads1/data/lambda_virus.fa')
 # p = 'CCC'
 # ten_as = 'AAAAAAAAAA'
 # t = ten_as + 'CCC' + ten_as + 'GGG' + ten_as
